@@ -23,14 +23,20 @@
                 android:layout_marginTop="40dp"
                 android:layout_centerHorizontal="true"
                 android:orientation="vertical">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearLayout"></LinearLayout>
             </ScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Turmas"
+                android:text="@string/turmas"
                 android:id="@+id/textView_professor"
-                android:textSize="30dp"
+                android:textSize="30sp"
                 android:gravity="center"
                 android:backgroundTint="#c7d3f6"
                 android:background="#c7d3f6"
@@ -43,10 +49,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Atividades da turma"
+                android:text="@string/atividades_da_turma"
                 android:id="@+id/textView4_professor"
                 android:layout_below="@+id/verticalScrollView_professor"
-                android:textSize="30dp"
+                android:textSize="30sp"
                 android:background="#c7d3f6"
                 android:backgroundTint="#c7d3f6"
                 android:gravity="center"
@@ -65,6 +71,11 @@
                 android:layout_centerHorizontal="true"
                 android:orientation="vertical">
 
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearLayout2"></LinearLayout>
             </ScrollView>
 
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -81,6 +92,12 @@
                 android:orientation="vertical"
                 android:layout_below="@+id/textView_professor"
                 android:layout_centerHorizontal="true">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearLayout3"></LinearLayout>
             </ScrollView>
 
 
