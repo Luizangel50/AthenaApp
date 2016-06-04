@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/home_activity"
+    android:id="@+id/home_activity_professor"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeActivity_Aluno">
+    tools:context=".HomeActivity_Professor">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/verticalScrollView_aluno"
+        android:id="@+id/vScrollView_professor"
         android:orientation="vertical">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#fff">
 
-
-            <HorizontalScrollView
+            <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/horizontalScrollView"
+                android:id="@+id/verticalScrollView_professor"
                 android:layout_marginTop="40dp"
-                android:layout_centerHorizontal="true">
-            </HorizontalScrollView>
+                android:layout_centerHorizontal="true"
+                android:orientation="vertical">
+            </ScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Atividades Pendentes"
-                android:id="@+id/textView"
+                android:text="Turmas"
+                android:id="@+id/textView_professor"
                 android:textSize="30dp"
                 android:gravity="center"
                 android:backgroundTint="#c7d3f6"
@@ -43,9 +43,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Atividades Entregues"
-                android:id="@+id/textView4"
-                android:layout_below="@+id/horizontalScrollView"
+                android:text="Atividades da turma"
+                android:id="@+id/textView4_professor"
+                android:layout_below="@+id/verticalScrollView_professor"
                 android:textSize="30dp"
                 android:background="#c7d3f6"
                 android:backgroundTint="#c7d3f6"
@@ -57,29 +57,40 @@
                 android:layout_alignParentStart="true"
                 />
 
-            <HorizontalScrollView
+            <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/horizontalScrollView2"
-                android:layout_below="@+id/textView4"
-                android:layout_centerHorizontal="true">
-            </HorizontalScrollView>
+                android:id="@+id/verticalScrollView2_professor"
+                android:layout_below="@+id/textView4_professor"
+                android:layout_centerHorizontal="true"
+                android:orientation="vertical">
+
+            </ScrollView>
 
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/fragmentContainer"
+                android:id="@+id/fragmentContainer_professor"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="16dp">
             </FrameLayout>
 
+            <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/verticalScrollView3_professor"
+                android:orientation="vertical"
+                android:layout_below="@+id/textView_professor"
+                android:layout_centerHorizontal="true">
+            </ScrollView>
+
+
         </RelativeLayout>
     </ScrollView>
-
 
     <com.squareup.timessquare.CalendarPickerView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/calendarView"
+        android:id="@+id/calendarView_professor"
         android:layout_gravity="center"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
