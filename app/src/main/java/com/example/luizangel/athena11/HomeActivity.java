@@ -1,6 +1,7 @@
 package com.example.luizangel.athena11;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -32,6 +33,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -45,6 +48,8 @@ public class HomeActivity extends AppCompatActivity {
     //    private CalendarView calendarView;
     private CalendarPickerView calendarPickerView;
     private ImageView imageView2;
+
+    private final int buttonSize = 30;
 
     private String nome;
     private String classe;
@@ -68,6 +73,7 @@ public class HomeActivity extends AppCompatActivity {
         setTitle("Bem vindo, " + nome);
 
         this.requestAtividades();
+        this.requestNotas();
         this.requestCalendario();
 
         BottomBar bottomBar = BottomBar.attach(this, savedInstanceState);
@@ -156,19 +162,24 @@ public class HomeActivity extends AppCompatActivity {
                                     for (int i = 0; i < atividades.length(); i++) {
                                         JSONObject atividade = atividades.getJSONObject(i);
                                         final String textAtividade =
-                                                atividade.getString("nome") + "\n" +
+                                                        atividade.getString("nome") + "\n" +
                                                         atividade.getString("turma") + "\n" +
                                                         atividade.getString("professor") + "\n" +
                                                         atividade.getString("prazo");
 
-                                        final Button textViewAtividadesPendentes = new Button(HomeActivity.this);
-                                        textViewAtividadesPendentes.setText(textAtividade);
-                                        textViewAtividadesPendentes.setTextSize(25);
+                                        final Button textViewAtividade = new Button(HomeActivity.this);
+                                        textViewAtividade.setText(textAtividade);
+                                        textViewAtividade.setTextSize(buttonSize);
 
                                         if (atividade.getString("entrega").equals("false")) {
-                                            topLinearLayout.addView(textViewAtividadesPendentes);
+                                            if (isExpired(atividade.getString("prazo"))) {
+                                                textViewAtividade.setTextColor(Color.parseColor("red"));
+                                            } else {
+                                                textViewAtividade.setTextColor(Color.parseColor("blue"));
+                                            }
+                                            topLinearLayout.addView(textViewAtividade);
                                         } else {
-                                            topLinearLayout2.addView(textViewAtividadesPendentes);
+                                            topLinearLayout2.addView(textViewAtividade);
                                         }
                                     }
                                 } else {
@@ -177,23 +188,35 @@ public class HomeActivity extends AppCompatActivity {
                                         JSONObject turma = turmas.getJSONObject(i);
 
                                         final Button textViewTurma = new Button(HomeActivity.this);
-                                        textViewTurma.setText(turma.getString("nome"));
-                                        textViewTurma.setTextSize(25);
+                                        final String textTurma = "Turma:\n" + turma.getString("nome");
+                                        textViewTurma.setText(textTurma);
+                                        textViewTurma.setTextSize(buttonSize);
                                         topLinearLayout.addView(textViewTurma);
+
+                                        final Button textViewTurma2 = new Button(HomeActivity.this);
+                                        textViewTurma2.setText(textTurma);
+                                        textViewTurma2.setTextSize(buttonSize);
+                                        topLinearLayout2.addView(textViewTurma2);
 
                                         JSONArray atividades = turma.getJSONArray("atividades");
                                         for (int j = 0; j < atividades.length(); j++) {
                                             JSONObject atividade = atividades.getJSONObject(j);
                                             final String textAtividade =
-                                                    atividade.getString("nome") + "\n" +
+                                                            atividade.getString("nome") + "\nSubmissoes: " +
                                                             atividade.getString("submissoes") + "\n" +
                                                             atividade.getString("prazo");
 
                                             final Button textViewAtividade = new Button(HomeActivity.this);
                                             textViewAtividade.setText(textAtividade);
-                                            textViewAtividade.setTextSize(25);
+                                            textViewAtividade.setTextSize(buttonSize);
 
-                                            topLinearLayout.addView(textViewAtividade);
+                                            if (isExpired(atividade.getString("prazo"))) {
+                                                textViewAtividade.setTextColor(Color.parseColor("red"));
+                                                topLinearLayout2.addView(textViewAtividade);
+                                            } else {
+                                                textViewAtividade.setTextColor(Color.parseColor("blue"));
+                                                topLinearLayout.addView(textViewAtividade);
+                                            }
                                         }
                                     }
                                 }
@@ -268,6 +291,102 @@ public class HomeActivity extends AppCompatActivity {
         horizontalScrollView2 = (HorizontalScrollView) findViewById(R.id.horizontalScrollView2);
         imageView2 = (ImageView) findViewById(R.id.imageView2);
         imageView2.setVisibility(View.INVISIBLE);
+
+        String url = APImanager.getInstance().APIcalendario(id);
+        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity.this);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        try {
+                            JSONObject response_json = new JSONObject(response);
+                            if (response_json.getString("valido").equals("true"))  {
+                                HorizontalScrollView scrollView = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
+                                HorizontalScrollView scrollView2 = (HorizontalScrollView) findViewById(R.id.horizontalScrollView2);
+
+                                LinearLayout topLinearLayout = new LinearLayout(HomeActivity.this);
+                                LinearLayout topLinearLayout2 = new LinearLayout(HomeActivity.this);
+
+                                topLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                topLinearLayout2.setOrientation(LinearLayout.HORIZONTAL);
+
+                                if (classe.equals("Aluno")) {
+                                    JSONArray atividades = response_json.getJSONArray("atividades");
+                                    for (int i = 0; i < atividades.length(); i++) {
+                                        JSONObject atividade = atividades.getJSONObject(i);
+                                        final String textAtividade =
+                                                atividade.getString("nome") + "\n" +
+                                                        atividade.getString("turma") + "\n" +
+                                                        atividade.getString("professor") + "\n" +
+                                                        atividade.getString("prazo");
+
+                                        final Button textViewAtividade = new Button(HomeActivity.this);
+                                        textViewAtividade.setText(textAtividade);
+                                        textViewAtividade.setTextSize(buttonSize);
+
+                                        if (atividade.getString("entrega").equals("false")) {
+                                            if (isExpired(atividade.getString("prazo"))) {
+                                                textViewAtividade.setTextColor(Color.parseColor("red"));
+                                            } else {
+                                                textViewAtividade.setTextColor(Color.parseColor("blue"));
+                                            }
+                                            topLinearLayout.addView(textViewAtividade);
+                                        } else {
+                                            topLinearLayout2.addView(textViewAtividade);
+                                        }
+                                    }
+                                }
+                                scrollView.addView(topLinearLayout);
+                                scrollView2.addView(topLinearLayout2);
+
+                            } else {
+
+                                Toast.makeText(HomeActivity.this, "Lista de Atividades inválida!", Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+
+                            Toast.makeText(HomeActivity.this, "Erro Json", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        Toast.makeText(HomeActivity.this, error.toString(), Toast.LENGTH_LONG).show();
+
+                    }
+                }) {
+//                    @Override
+//                    protected Map<String,String> getParams(){
+//                        Map<String,String> params = new HashMap<String, String>();
+//                        params.put(KEY_USERNAME,username);
+//                        params.put(KEY_PASSWORD,password);
+////                        params.put(KEY_EMAIL, email);
+//                        return params;
+//                    }
+
+        };
+        requestQueue.add(stringRequest);
+    }
+
+    /**
+     * HTTP Request for Notas Screen
+     */
+    public void requestNotas() {
+
+    }
+
+    public boolean isExpired (String date) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            return new Date().after(sdf.parse(date));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override

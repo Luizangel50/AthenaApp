@@ -22,11 +22,12 @@ public class APImanager {
     public String APIatividades (String id) {
         return APIurlatividades + id;
     }
-    public String APInotas (String id) {
-        return APIurlnotas + id;
-    }
+    public String APInotas (String id)      { return APIurlnotas + id;      }
     public String APIcalendario (String id) {
         return APIurlcalendario + id;
     }
+
+
+
 
 }
