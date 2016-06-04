@@ -37,17 +37,14 @@ import java.util.Date;
 public class HomeActivity_Aluno extends AppCompatActivity {
 
     private CoordinatorLayout coordinatorLayout;
-    private ScrollView verticalScrollView;
-    private HorizontalScrollView horizontalScrollView;
-    private HorizontalScrollView horizontalScrollView2;
-    private LinearLayout topLinearLayout;
-    private LinearLayout topLinearLayout2;
-    private TextView textView;
-    private TextView textView4;
+    private ScrollView verticalScrollView, scrollView3;
+    private HorizontalScrollView horizontalScrollView, horizontalScrollView2;
+    private LinearLayout topLinearLayout, topLinearLayout2, topLinearLayout3;
+    private TextView textView, textView4;
     private CalendarPickerView calendarPickerView;
     private BottomBar bottomBar;
 
-    private JSONObject notas;
+    private JSONArray notas;
 
     private final int buttonSize = 30;
 
@@ -74,8 +71,6 @@ public class HomeActivity_Aluno extends AppCompatActivity {
         classe = getIntent().getExtras().getString("class");
         id = getIntent().getExtras().getString("id");
 
-        setTitle("Bem vindo, " + nome);
-
         /**************Calendario**************/
         Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.MONTH, 3);
@@ -88,10 +83,12 @@ public class HomeActivity_Aluno extends AppCompatActivity {
         /**************Componentes**************/
         textView = (TextView) findViewById(R.id.textView);
         textView4 = (TextView) findViewById(R.id.textView4);
+        scrollView3 = (ScrollView) findViewById(R.id.scrollView3);
         horizontalScrollView = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
         horizontalScrollView2 = (HorizontalScrollView) findViewById(R.id.horizontalScrollView2);
         topLinearLayout = (LinearLayout) findViewById(R.id.linearLayout);
         topLinearLayout2 = (LinearLayout) findViewById(R.id.linearLayout2);
+        topLinearLayout3 = (LinearLayout) findViewById(R.id.linearLayout3);
 
         /**************Barra****************/
         bottomBar = BottomBar.attach(this, savedInstanceState);
@@ -113,25 +110,31 @@ public class HomeActivity_Aluno extends AppCompatActivity {
             public void onItemSelected(int position) {
                 switch (position) {
                     case 0:
+                        setTitle("Bem vindo, " + nome);
                         calendarPickerView.setVisibility(View.INVISIBLE);
                         horizontalScrollView2.setVisibility(View.VISIBLE);
                         textView.setVisibility(View.VISIBLE);
                         textView4.setVisibility(View.VISIBLE);
                         horizontalScrollView.setVisibility(View.VISIBLE);
+                        scrollView3.setVisibility(View.INVISIBLE);
                         break;
                     case 1:
+                        setTitle("Calendario");
                         horizontalScrollView.setVisibility(View.INVISIBLE);
                         horizontalScrollView2.setVisibility(View.INVISIBLE);
                         textView.setVisibility(View.INVISIBLE);
                         textView4.setVisibility(View.INVISIBLE);
                         calendarPickerView.setVisibility(View.VISIBLE);
+                        scrollView3.setVisibility(View.INVISIBLE);
                         break;
                     case 2:
+                        setTitle("Quadro de notas");
                         horizontalScrollView.setVisibility(View.INVISIBLE);
                         horizontalScrollView2.setVisibility(View.INVISIBLE);
                         textView.setVisibility(View.INVISIBLE);
                         textView4.setVisibility(View.INVISIBLE);
                         calendarPickerView.setVisibility(View.INVISIBLE);
+                        scrollView3.setVisibility(View.VISIBLE);
                         break;
                     case 3:
                         Intent it = new Intent(HomeActivity_Aluno.this, LoginActivity.class);
@@ -163,24 +166,56 @@ public class HomeActivity_Aluno extends AppCompatActivity {
 
                         JSONArray atividades = response_json.getJSONArray("atividades");
                         for (int i = 0; i < atividades.length(); i++) {
-                            JSONObject atividade = atividades.getJSONObject(i);
+                            final JSONObject atividade = atividades.getJSONObject(i);
                             final String textAtividade =
-                                    atividade.getString("turma") + "\n" +
+                                            atividade.getString("turma") + "\n" +
                                             atividade.getString("nome") + "\nProf: " +
                                             atividade.getString("professor") + "\n" +
                                             atividade.getString("prazo");
 
-                            final Button textViewAtividade = new Button(HomeActivity_Aluno.this);
-                            textViewAtividade.setText(textAtividade);
-                            textViewAtividade.setTextSize(buttonSize);
+                            final Button buttonAtividade = new Button(HomeActivity_Aluno.this);
+                            buttonAtividade.setText(textAtividade);
+                            buttonAtividade.setTextSize(buttonSize);
 
+                            buttonAtividade.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    bottomBar.selectTabAtPosition(2, true);
+                                    scrollView3.scrollTo(0, 0);
+                                    try {
+                                        topLinearLayout3.removeAllViews();
+                                        String turma = atividade.getString("turma");
+                                        setTitle("Turma: " + turma);
+
+                                        for (int j = 0; j < notas.length(); j++) {
+                                            final JSONObject nota = notas.getJSONObject(j);
+                                            if (nota.getString("turma").equals(turma)) {
+
+                                                Button buttonNota = new Button(HomeActivity_Aluno.this);
+                                                String textNota =  "Atividade: "+ nota.getString("atividade") + "\n" +
+                                                                    "Nota: "    + nota.getString("nota") + "\n" +
+                                                                    "Prazo: "   + nota.getString("prazo") + "\n" +
+                                                                    "Envio: "   + nota.getString("data_envio");
+
+                                                buttonNota.setText(textNota);
+                                                buttonNota.setTextSize(buttonSize);
+
+                                                topLinearLayout3.addView(buttonNota);
+                                            }
+                                        }
+                                    }
+                                    catch (JSONException e) {
+                                        Toast.makeText(HomeActivity_Aluno.this, "Erro no JSON", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                             if (atividade.getString("entrega").equals("false")) {
                                 if (isExpired(atividade.getString("prazo")))
-                                    textViewAtividade.setTextColor(Color.parseColor("red"));
-                                else textViewAtividade.setTextColor(Color.parseColor("blue"));
-                                topLinearLayout.addView(textViewAtividade);
+                                    buttonAtividade.setTextColor(Color.parseColor("red"));
+                                else buttonAtividade.setTextColor(Color.parseColor("blue"));
+                                topLinearLayout.addView(buttonAtividade);
                             } else {
-                                topLinearLayout2.addView(textViewAtividade);
+                                topLinearLayout2.addView(buttonAtividade);
                             }
                         }
                     } else {
@@ -252,7 +287,10 @@ public class HomeActivity_Aluno extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            notas = new JSONObject(response);
+                            JSONObject resposta = new JSONObject(response);
+                            if (resposta.getString("valido").equals("true")) {
+                                notas = resposta.getJSONArray("notas");
+                            }
                         }
                         catch (JSONException e) {
                             Toast.makeText(HomeActivity_Aluno.this, "Erro Json Notas",Toast.LENGTH_SHORT).show();
@@ -267,14 +305,6 @@ public class HomeActivity_Aluno extends AppCompatActivity {
                 }){
         };
         requestQueue.add(stringRequestNotas);
-    }
-
-    public void showNota() {
-        try {
-
-        } catch (Exception e) {
-            Toast.makeText(HomeActivity_Aluno.this, "Erro na lista de atividades", Toast.LENGTH_SHORT).show();
-        }
     }
 
     public boolean isExpired (String date) {

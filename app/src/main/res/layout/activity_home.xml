@@ -13,7 +13,7 @@
         android:orientation="vertical">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="#fff">
 
 
@@ -83,6 +83,19 @@
                 android:layout_height="match_parent"
                 android:padding="16dp">
             </FrameLayout>
+
+            <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/scrollView3" >
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearLayout3"
+                    android:baselineAligned="false"></LinearLayout>
+            </ScrollView>
 
         </RelativeLayout>
     </ScrollView>

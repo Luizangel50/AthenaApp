@@ -81,8 +81,6 @@ public class HomeActivity_Professor extends AppCompatActivity {
         classe = getIntent().getExtras().getString("class");
         id = getIntent().getExtras().getString("id");
 
-        setTitle("Bem vindo, " + nome + "!");
-
         /**************Calendario**************/
         Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.MONTH, 3);
@@ -122,6 +120,7 @@ public class HomeActivity_Professor extends AppCompatActivity {
             public void onItemSelected(int position) {
                 switch (position) {
                     case 0:
+                        setTitle("Bem vindo, " + nome);
                         verticalScrollViewZ.setVisibility(View.VISIBLE);
                         calendarPickerView.setVisibility(View.INVISIBLE);
                         textView.setVisibility(View.VISIBLE);
@@ -132,6 +131,7 @@ public class HomeActivity_Professor extends AppCompatActivity {
                         verticalScrollView3.setVisibility(View.INVISIBLE);
                         break;
                     case 1:
+                        setTitle("Calendario");
                         verticalScrollViewZ.setVisibility(View.INVISIBLE);
                         verticalScrollView.setVisibility(View.INVISIBLE);
                         verticalScrollView2.setVisibility(View.INVISIBLE);
@@ -141,6 +141,7 @@ public class HomeActivity_Professor extends AppCompatActivity {
                         calendarPickerView.setVisibility(View.VISIBLE);
                         break;
                     case 2:
+                        setTitle("Quadro de Notas");
                         verticalScrollViewZ.setVisibility(View.VISIBLE);
                         verticalScrollView.setVisibility(View.INVISIBLE);
                         verticalScrollView2.setVisibility(View.INVISIBLE);
@@ -203,18 +204,21 @@ public class HomeActivity_Professor extends AppCompatActivity {
                                                 @Override
                                                 public void onClick(View v) {
                                                     bottomBar.selectTabAtPosition(2, true);
+                                                    verticalScrollViewZ.scrollTo(0, 0);
                                                     try {
                                                         topLinearLayout3.removeAllViews();
 
                                                         JSONObject turma_selecionada = notas.getJSONObject(turma.getString("nome"));
                                                         JSONArray atividade_selecionada = turma_selecionada.getJSONArray(atividade.getString("nome"));
+                                                        setTitle("Turma: " + turma.getString("nome"));
 
                                                         for (int j = 0; j < atividade_selecionada.length(); j++) {
                                                             JSONObject nota_aluno = atividade_selecionada.getJSONObject(j);
 
                                                             Button buttonNota = new Button(HomeActivity_Professor.this);
-                                                            String text_nota =  "Aluno: " + nota_aluno.getString("aluno") + "\n" +
-                                                                    "Nota: " + nota_aluno.getString("nota");
+                                                            String text_nota =  "Aluno: "   + nota_aluno.getString("aluno") + "\n" +
+                                                                                "Nota: "    + nota_aluno.getString("nota")   + "\n" +
+                                                                                "Resultado: " + nota_aluno.getString("resultado");
 
                                                             buttonNota.setText(text_nota);
                                                             buttonNota.setTextSize(buttonSize);
