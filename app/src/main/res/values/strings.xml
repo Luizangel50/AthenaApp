@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Athena1.1</string>
+    <string name="app_name">Athena</string>
 
     <!-- Strings relacionadas a tela de login -->
     <string name="prompt_email">Usuário</string>
@@ -76,4 +76,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="atividades_pendentes">Atividades Pendentes</string>
+    <string name="atividades_entregues">Atividades Entregues</string>
+    <string name="logo">logo</string>
 </resources>

@@ -19,15 +19,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.luizangel.athena11.HomeActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class LoginActivity extends AppCompatActivity  implements
         View.OnClickListener{
@@ -75,11 +70,6 @@ public class LoginActivity extends AppCompatActivity  implements
                 if (event != null&& (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     InputMethodManager in = (InputMethodManager) getSystemService(LoginActivity.INPUT_METHOD_SERVICE);
 
-                    // NOTE: In the author's example, he uses an identifier
-                    // called searchBar. If setting this code on your EditText
-                    // then use v.getWindowToken() as a reference to your
-                    // EditText is passed into this callback as a TextView
-
                     in.hideSoftInputFromWindow(editText
                                     .getApplicationWindowToken(),
                             InputMethodManager.HIDE_NOT_ALWAYS);
@@ -98,11 +88,6 @@ public class LoginActivity extends AppCompatActivity  implements
                                           KeyEvent event) {
                 if (event != null&& (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     InputMethodManager in = (InputMethodManager) getSystemService(LoginActivity.INPUT_METHOD_SERVICE);
-
-                    // NOTE: In the author's example, he uses an identifier
-                    // called searchBar. If setting this code on your EditText
-                    // then use v.getWindowToken() as a reference to your
-                    // EditText is passed into this callback as a TextView
 
                     in.hideSoftInputFromWindow(editText2
                                     .getApplicationWindowToken(),
@@ -125,23 +110,24 @@ public class LoginActivity extends AppCompatActivity  implements
 
                 final String username = editText.getText().toString().trim();
                 final String password = editText2.getText().toString().trim();
-                final String email = editText.getText().toString().trim();
 
-                String url = "http://192.168.137.62:8000/Mlogin/?username=" + username + "&password="+ password;
+                String url = APImanager.getInstance().APIlogin(username, password);
                 RequestQueue requestQueue = Volley.newRequestQueue(LoginActivity.this);
 
                 StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-
                                 try {
                                     JSONObject response_json = new JSONObject(response);
-                                    if (response_json.getString("valido").equals("true") && response_json.getString("class").equals("Aluno")) {
+                                    if (response_json.getString("valido").equals("true")) {
 
-                                        Toast.makeText(LoginActivity.this, "Bem Vindo, Aluno!", Toast.LENGTH_LONG).show();
+                                        String classe = response_json.getString("class");
+
+                                        Toast.makeText(LoginActivity.this, ("Bem Vindo, " + classe + "!"), Toast.LENGTH_LONG).show();
 
                                         it.putExtra("username", response_json.getString("username"));
+                                        it.putExtra("classe", response_json.getString("class"));
                                         it.putExtra("email", response_json.getString("email"));
                                         it.putExtra("nome", response_json.getString("nome"));
                                         it.putExtra("id", response_json.getString("id"));

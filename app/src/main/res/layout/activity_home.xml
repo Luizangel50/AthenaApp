@@ -71,9 +71,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Atividades Pendentes"
+            android:text="@string/atividades_pendentes"
             android:id="@+id/textView"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:gravity="center"
             android:backgroundTint="#c7d3f6"
             android:background="#c7d3f6"
@@ -86,10 +86,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Atividades Entregues"
+            android:text="@string/atividades_entregues"
             android:id="@+id/textView4"
             android:layout_below="@+id/horizontalScrollView"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:background="#c7d3f6"
             android:backgroundTint="#c7d3f6"
             android:gravity="center"
@@ -99,6 +99,19 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/fragmentContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+            </FrameLayout>
+        </LinearLayout>
 
         <HorizontalScrollView
             android:layout_width="wrap_content"
@@ -158,13 +171,6 @@
             android:layout_centerVertical="true"/>
 
 
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/fragmentContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="16dp">
-        </FrameLayout>
-
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -172,7 +178,8 @@
             android:id="@+id/imageView2"
             android:layout_gravity="center"
             android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/logo" />
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
