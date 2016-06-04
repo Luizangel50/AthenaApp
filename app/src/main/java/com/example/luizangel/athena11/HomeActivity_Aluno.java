@@ -18,6 +18,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,16 +44,15 @@ import org.w3c.dom.Text;
 import java.util.Calendar;
 import java.util.Date;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity_Aluno extends AppCompatActivity {
 
     private CoordinatorLayout coordinatorLayout;
+    private ScrollView verticalScrollView;
     private HorizontalScrollView horizontalScrollView;
     private HorizontalScrollView horizontalScrollView2;
     private TextView textView;
     private TextView textView4;
-//    private CalendarView calendarView;
     private CalendarPickerView calendarPickerView;
-    private ImageView imageView2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,14 +60,14 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         String nome = getIntent().getExtras().getString("nome");
-        setTitle("Bem vindo, " + nome);
+        setTitle("Bem vindo, " + nome + "!");
 
 
         /************Atividades************/
 
         String id = getIntent().getExtras().getString("id");
-        String url = "http://192.168.137.62:8000/Matividades/?id=" + id;
-        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity.this);
+        String url = "http://192.168.0.24:8000/Matividades/?id=" + id;
+        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity_Aluno.this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -83,22 +83,23 @@ public class HomeActivity extends AppCompatActivity {
                                 HorizontalScrollView scrollView = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
                                 HorizontalScrollView scrollView2 = (HorizontalScrollView) findViewById(R.id.horizontalScrollView2);
 
-                                LinearLayout topLinearLayout = new LinearLayout(HomeActivity.this);
-                                LinearLayout topLinearLayout2 = new LinearLayout(HomeActivity.this);
+                                LinearLayout topLinearLayout = new LinearLayout(HomeActivity_Aluno.this);
+                                LinearLayout topLinearLayout2 = new LinearLayout(HomeActivity_Aluno.this);
 
                                 topLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
                                 topLinearLayout2.setOrientation(LinearLayout.HORIZONTAL);
 
                                 for(int i = 0; i < atividades.length(); i++) {
                                     JSONObject atividade = atividades.getJSONObject(i);
-//                                    Toast.makeText(HomeActivity.this, atividade.toString(), Toast.LENGTH_LONG).show();
+//                                    Toast.makeText(HomeActivity_Aluno.this, atividade.toString(), Toast.LENGTH_LONG).show();
 
-                                    final Button textViewAtividadesPendentes = new Button(HomeActivity.this);
-                                    textViewAtividadesPendentes.setText(
-                                            atividade.getString("nome") + "\n" +
-                                            atividade.getString("turma") + "\n" +
-                                            atividade.getString("detalhe") + "\n" +
-                                            atividade.getString("prazo"));
+                                    final Button textViewAtividadesPendentes = new Button(HomeActivity_Aluno.this);
+                                    String text_atividade = atividade.getString("turma") + "\n" +
+                                                            atividade.getString("nome") + "\n" +
+                                                            "Nota: " + atividade.getString("nota") + "\n" +
+                                                            "Envio: " + atividade.getString("envio") + "\n" +
+                                                            "Prazo: " + atividade.getString("prazo");
+                                    textViewAtividadesPendentes.setText(text_atividade);
                                     textViewAtividadesPendentes.setTextSize(25);
 
                                     if(atividade.getString("entrega").equals("false")) {
@@ -116,13 +117,13 @@ public class HomeActivity extends AppCompatActivity {
                             }
                             else {
 
-                                Toast.makeText(HomeActivity.this, "Lista de Atividades inválida!",Toast.LENGTH_LONG).show();
+                                Toast.makeText(HomeActivity_Aluno.this, "Lista de Atividades inválida!",Toast.LENGTH_LONG).show();
                             }
                         }
 
                         catch (JSONException e) {
 
-                            Toast.makeText(HomeActivity.this,"Erro Json",Toast.LENGTH_LONG).show();
+                            Toast.makeText(HomeActivity_Aluno.this,"Erro Json",Toast.LENGTH_LONG).show();
                         }
                     }
                 },
@@ -130,7 +131,7 @@ public class HomeActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
-                        Toast.makeText(HomeActivity.this,error.toString(),Toast.LENGTH_LONG).show();
+                        Toast.makeText(HomeActivity_Aluno.this,error.toString(),Toast.LENGTH_LONG).show();
 
                     }
                 }){
@@ -175,61 +176,51 @@ public class HomeActivity extends AppCompatActivity {
 
         textView = (TextView) findViewById(R.id.textView);
         textView4 = (TextView) findViewById(R.id.textView4);
+        verticalScrollView = (ScrollView) findViewById(R.id.verticalScrollView_aluno);
         horizontalScrollView = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
         horizontalScrollView2 = (HorizontalScrollView) findViewById(R.id.horizontalScrollView2);
-        imageView2 = (ImageView) findViewById(R.id.imageView2);
-        imageView2.setVisibility(View.INVISIBLE);
 
         BottomBar bottomBar = BottomBar.attach(this, savedInstanceState);
         bottomBar.setFragmentItems(getSupportFragmentManager(), R.id.fragmentContainer,
                 new BottomBarFragment(new SampleFragment(), R.drawable.ic_home, "Home"),
                 new BottomBarFragment(new SampleFragment(), R.drawable.ic_prazos, "Prazos"),
-                new BottomBarFragment(new SampleFragment(), R.drawable.ic_notas, "Notas"),
                 new BottomBarFragment(new SampleFragment(), R.drawable.ic_logout, "Logout")
         );
+
         // Setting colors for different tabs when there's more than three of them.
         bottomBar.mapColorForTab(0, "#3B494C");
         bottomBar.mapColorForTab(1, "#00796B");
-        bottomBar.mapColorForTab(2, "#7B1FA2");
-        bottomBar.mapColorForTab(3, "#FF5252");
+        bottomBar.mapColorForTab(2, "#FF5252");
 
         bottomBar.setOnItemSelectedListener(new OnTabSelectedListener() {
             @Override
             public void onItemSelected(int position) {
                 switch (position) {
                     case 0:
+                        verticalScrollView.setVisibility(View.VISIBLE);
                         calendarPickerView.setVisibility(View.INVISIBLE);
-                        imageView2.setVisibility(View.INVISIBLE);
                         horizontalScrollView2.setVisibility(View.VISIBLE);
                         textView.setVisibility(View.VISIBLE);
                         textView4.setVisibility(View.VISIBLE);
                         horizontalScrollView.setVisibility(View.VISIBLE);
                         break;
                     case 1:
+                        verticalScrollView.setVisibility(View.INVISIBLE);
                         horizontalScrollView.setVisibility(View.INVISIBLE);
                         horizontalScrollView2.setVisibility(View.INVISIBLE);
                         textView.setVisibility(View.INVISIBLE);
                         textView4.setVisibility(View.INVISIBLE);
                         calendarPickerView.setVisibility(View.VISIBLE);
-                        imageView2.setVisibility(View.INVISIBLE);
                         break;
                     case 2:
-                        horizontalScrollView.setVisibility(View.INVISIBLE);
-                        horizontalScrollView2.setVisibility(View.INVISIBLE);
-                        textView.setVisibility(View.INVISIBLE);
-                        textView4.setVisibility(View.INVISIBLE);
-                        calendarPickerView.setVisibility(View.INVISIBLE);
-                        imageView2.setVisibility(View.VISIBLE);
-                        break;
-
-                    case 3:
-                        Intent it = new Intent(HomeActivity.this, LoginActivity.class);
+                        Intent it = new Intent(HomeActivity_Aluno.this, LoginActivity.class);
                         startActivity(it);
                         finish();
                         break;
                 }
             }
         });
+
 
         // Make a Badge for the first tab, with red background color and a value of "4".
 //        BottomBarBadge unreadMessages = bottomBar.makeBadgeForTabAt(1, "#E91E63", 4);
