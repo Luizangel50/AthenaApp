@@ -13,7 +13,7 @@
         android:orientation="vertical">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="#fff">
 
 
@@ -23,14 +23,20 @@
                 android:id="@+id/horizontalScrollView"
                 android:layout_marginTop="40dp"
                 android:layout_centerHorizontal="true">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/linearLayout"></LinearLayout>
             </HorizontalScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Atividades Pendentes"
+                android:text="@string/atividades_pendentes"
                 android:id="@+id/textView"
-                android:textSize="30dp"
+                android:textSize="30sp"
                 android:gravity="center"
                 android:backgroundTint="#c7d3f6"
                 android:background="#c7d3f6"
@@ -43,10 +49,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Atividades Entregues"
+                android:text="@string/atividades_entregues"
                 android:id="@+id/textView4"
                 android:layout_below="@+id/horizontalScrollView"
-                android:textSize="30dp"
+                android:textSize="30sp"
                 android:background="#c7d3f6"
                 android:backgroundTint="#c7d3f6"
                 android:gravity="center"
@@ -63,6 +69,12 @@
                 android:id="@+id/horizontalScrollView2"
                 android:layout_below="@+id/textView4"
                 android:layout_centerHorizontal="true">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/linearLayout2"></LinearLayout>
             </HorizontalScrollView>
 
             <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -71,6 +83,19 @@
                 android:layout_height="match_parent"
                 android:padding="16dp">
             </FrameLayout>
+
+            <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/scrollView3" >
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearLayout3"
+                    android:baselineAligned="false"></LinearLayout>
+            </ScrollView>
 
         </RelativeLayout>
     </ScrollView>
