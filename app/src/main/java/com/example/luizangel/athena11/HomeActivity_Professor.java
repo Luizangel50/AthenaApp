@@ -1,23 +1,11 @@
 package com.example.luizangel.athena11;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.transition.Visibility;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CalendarView;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -30,9 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.roughike.bottombar.BottomBar;
-import com.roughike.bottombar.BottomBarBadge;
 import com.roughike.bottombar.BottomBarFragment;
-import com.roughike.bottombar.OnMenuTabSelectedListener;
 import com.roughike.bottombar.OnTabSelectedListener;
 
 import com.squareup.timessquare.CalendarPickerView;
@@ -40,45 +26,36 @@ import com.squareup.timessquare.CalendarPickerView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class HomeActivity_Professor extends AppCompatActivity {
+public class HomeActivity_Professor extends AppCompatActivity implements HomeInterface {
 
-    private CoordinatorLayout coordinatorLayout;
     private ScrollView verticalScrollViewZ, verticalScrollView, verticalScrollView2, verticalScrollView3;
     private LinearLayout topLinearLayout, topLinearLayout2, topLinearLayout3;
     private TextView textView, textView2;
     private CalendarPickerView calendarPickerView;
     private BottomBar bottomBar;
-
-    private JSONObject notas;
-
     private final int buttonSize = 30;
 
-    private String nome, classe, id;
+    private JSONObject notas;
+    private JSONArray turmas, datas;
+    private String nome, id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_professor);
-
         initialize(savedInstanceState);
-
-        /* Perform requests */
-        requestNotas();
-        requestAtividades();
-        requestCalendario();
+        performRequests();
     }
 
     void initialize(Bundle savedInstanceState) {
 
         nome = getIntent().getExtras().getString("nome");
-        classe = getIntent().getExtras().getString("class");
         id = getIntent().getExtras().getString("id");
 
         /**************Calendario**************/
@@ -163,162 +140,107 @@ public class HomeActivity_Professor extends AppCompatActivity {
         bottomBar.useDarkTheme(true);
     }
 
-    /**
-     * HTTP Request for Atividades Screen
-     */
-    private void requestAtividades() {
+    void performRequests() {
+        manager.delegate = this;
+        manager.delegateKind = 1;
+        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APInotas(id));
+        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APIcalendario(id));
+        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APIatividades(id));
+    }
 
-        String url = APImanager.getInstance().APIatividades(id);
-        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity_Professor.this);
+    public void showAtividades (JSONArray listaTurmas) {
+        this.turmas = listaTurmas;
+        try {
+            for(int i = 0; i < turmas.length(); i++) {
+                final JSONObject turma = turmas.getJSONObject(i);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
+                final JSONArray atividades = turma.getJSONArray("atividades");
 
-                try {
-                    JSONObject response_json = new JSONObject(response);
+                final Button buttonTurmas = new Button(HomeActivity_Professor.this);
+                buttonTurmas.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            topLinearLayout2.removeAllViews();
 
-                    if (response_json.getString("valido").equals("true")) {
+                            for(int i = 0; i < atividades.length(); i++) {
+                                final JSONObject atividade = atividades.getJSONObject(i);
 
-                        JSONArray turmas = response_json.getJSONArray("turmas");
+                                Button buttonAtividade = new Button(HomeActivity_Professor.this);
+                                buttonAtividade.setClickable(true);
+                                buttonAtividade.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        bottomBar.selectTabAtPosition(2, true);
+                                        verticalScrollViewZ.scrollTo(0, 0);
+                                        try {
+                                            topLinearLayout3.removeAllViews();
 
-                        for(int i = 0; i < turmas.length(); i++) {
-                            final JSONObject turma = turmas.getJSONObject(i);
+                                            JSONObject turma_selecionada = notas.getJSONObject(turma.getString("nome"));
+                                            JSONArray atividade_selecionada = turma_selecionada.getJSONArray(atividade.getString("nome"));
+                                            setTitle("Turma: " + turma.getString("nome"));
 
-                            final JSONArray atividades = turma.getJSONArray("atividades");
+                                            for (int j = 0; j < atividade_selecionada.length(); j++) {
+                                                JSONObject nota_aluno = atividade_selecionada.getJSONObject(j);
 
-                            final Button buttonTurmas = new Button(HomeActivity_Professor.this);
-                            buttonTurmas.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    try {
-                                        topLinearLayout2.removeAllViews();
+                                                Button buttonNota = new Button(HomeActivity_Professor.this);
+                                                String text_nota =  "Aluno: "   + nota_aluno.getString("aluno") + "\n" +
+                                                        "Nota: "    + nota_aluno.getString("nota")   + "\n" +
+                                                        "Resultado: " + nota_aluno.getString("resultado");
 
-                                        for(int i = 0; i < atividades.length(); i++) {
-                                            final JSONObject atividade = atividades.getJSONObject(i);
+                                                buttonNota.setText(text_nota);
+                                                buttonNota.setTextSize(buttonSize);
 
-                                            Button buttonAtividade = new Button(HomeActivity_Professor.this);
-                                            buttonAtividade.setClickable(true);
-                                            buttonAtividade.setOnClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    bottomBar.selectTabAtPosition(2, true);
-                                                    verticalScrollViewZ.scrollTo(0, 0);
-                                                    try {
-                                                        topLinearLayout3.removeAllViews();
-
-                                                        JSONObject turma_selecionada = notas.getJSONObject(turma.getString("nome"));
-                                                        JSONArray atividade_selecionada = turma_selecionada.getJSONArray(atividade.getString("nome"));
-                                                        setTitle("Turma: " + turma.getString("nome"));
-
-                                                        for (int j = 0; j < atividade_selecionada.length(); j++) {
-                                                            JSONObject nota_aluno = atividade_selecionada.getJSONObject(j);
-
-                                                            Button buttonNota = new Button(HomeActivity_Professor.this);
-                                                            String text_nota =  "Aluno: "   + nota_aluno.getString("aluno") + "\n" +
-                                                                                "Nota: "    + nota_aluno.getString("nota")   + "\n" +
-                                                                                "Resultado: " + nota_aluno.getString("resultado");
-
-                                                            buttonNota.setText(text_nota);
-                                                            buttonNota.setTextSize(buttonSize);
-
-                                                            topLinearLayout3.addView(buttonNota);
-                                                        }
-                                                    }
-                                                    catch (JSONException e) {
-                                                        Toast.makeText(HomeActivity_Professor.this, "Erro no JSON", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                }
-                                            });
-
-                                            final String textAtividade =
-                                                            atividade.getString("nome") + "\nSubmissoes: " +
-                                                            atividade.getString("submissoes") + "\n" +
-                                                            atividade.getString("prazo");
-                                            buttonAtividade.setText(textAtividade);
-                                            buttonAtividade.setTextSize(buttonSize);
-
-                                            if (isExpired(atividade.getString("prazo"))) {
-                                                buttonAtividade.setTextColor(Color.parseColor("red"));
-                                            } else {
-                                                buttonAtividade.setTextColor(Color.parseColor("blue"));
+                                                topLinearLayout3.addView(buttonNota);
                                             }
-                                            topLinearLayout2.addView(buttonAtividade);
+                                        }
+                                        catch (JSONException e) {
+                                            Toast.makeText(HomeActivity_Professor.this, "Erro no JSON", Toast.LENGTH_SHORT).show();
                                         }
                                     }
-                                    catch (Exception e) {
-                                        Toast.makeText(HomeActivity_Professor.this, "Erro na lista de atividades", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
+                                });
 
-                            String textTurma = turma.getString("nome") + "\n" +
-                                    atividades.length() + " Atividades";
-                            buttonTurmas.setText(textTurma);
-                            buttonTurmas.setTextSize(buttonSize);
+                                final String textAtividade =
+                                        atividade.getString("nome") + "\nSubmissoes: " +
+                                                atividade.getString("submissoes") + "\n" +
+                                                atividade.getString("prazo");
+                                buttonAtividade.setText(textAtividade);
+                                buttonAtividade.setTextSize(buttonSize);
 
-                            topLinearLayout.addView(buttonTurmas);
+                                if (isExpired(atividade.getString("prazo")))
+                                    buttonAtividade.setTextColor(Color.parseColor("red"));
+                                else buttonAtividade.setTextColor(Color.parseColor("blue"));
+
+                                topLinearLayout2.addView(buttonAtividade);
+                            }
+                        }
+                        catch (Exception e) {
+                            Toast.makeText(HomeActivity_Professor.this, "Erro na lista de atividades", Toast.LENGTH_SHORT).show();
                         }
                     }
-                    else {
-                        Toast.makeText(HomeActivity_Professor.this, "Lista de Atividades inválida!",Toast.LENGTH_LONG).show();
-                    }
-                }
-                catch (JSONException e) {
+                });
 
-                    Toast.makeText(HomeActivity_Professor.this,"Erro Json",Toast.LENGTH_LONG).show();
-                }
+                String textTurma = turma.getString("nome") + "\n" +
+                        atividades.length() + " Atividades";
+                buttonTurmas.setText(textTurma);
+                buttonTurmas.setTextSize(buttonSize);
+
+                topLinearLayout.addView(buttonTurmas);
             }
-        },
-        new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                Toast.makeText(HomeActivity_Professor.this,error.toString(),Toast.LENGTH_LONG).show();
-
-            }
-        });
-        requestQueue.add(stringRequest);
+        } catch (JSONException e) {
+            Toast.makeText(HomeActivity_Professor.this,"Erro Json",Toast.LENGTH_LONG).show();
+        }
     }
 
-    /**
-     * HTTP Request for Notas Screen
-     */
-    private void requestNotas() {
-
-        String urlNotas = APImanager.getInstance().APInotas(id);
-        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity_Professor.this);
-        StringRequest stringRequestNotas = new StringRequest(Request.Method.GET, urlNotas,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            notas = new JSONObject(response);
-                        }
-
-                        catch (JSONException e) {
-                            Toast.makeText(HomeActivity_Professor.this, "Erro Json Notas",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(HomeActivity_Professor.this,error.toString(),Toast.LENGTH_SHORT).show();
-                    }
-                }){
-        };
-        requestQueue.add(stringRequestNotas);
+    public void showNotasBisonhoQueORodrigoFez(JSONObject listaNotas) {
+        this.notas = listaNotas;
     }
 
-    /**
-     * HTTP Request for Calendar Screen
-     */
-    private void requestCalendario() {
+    public void showNotas (JSONArray listaNotas) {
+    }
 
-
+    public void showCalendario (JSONArray calendario) {
+        this.datas = calendario;
     }
 
     public boolean isExpired (String date) {

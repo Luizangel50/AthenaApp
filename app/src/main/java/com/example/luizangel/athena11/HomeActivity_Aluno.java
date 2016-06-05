@@ -3,8 +3,8 @@ package com.example.luizangel.athena11;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.View;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
@@ -34,41 +34,30 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class HomeActivity_Aluno extends AppCompatActivity {
+public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterface{
 
-    private CoordinatorLayout coordinatorLayout;
-    private ScrollView verticalScrollView, scrollView3;
+    private ScrollView scrollView3;
     private HorizontalScrollView horizontalScrollView, horizontalScrollView2;
     private LinearLayout topLinearLayout, topLinearLayout2, topLinearLayout3;
     private TextView textView, textView4;
     private CalendarPickerView calendarPickerView;
     private BottomBar bottomBar;
-
-    private JSONArray notas;
-
     private final int buttonSize = 30;
 
-    private String nome;
-    private String classe;
-    private String id;
+    private JSONArray atividades, notas, datas;
+    private String nome, id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
         initialize(savedInstanceState);
-
-        /* Perform requests */
-        requestAtividades();
-        requestNotas();
-        requestCalendario();
+        performRequests();
     }
 
     public void initialize(Bundle savedInstanceState) {
 
         nome = getIntent().getExtras().getString("nome");
-        classe = getIntent().getExtras().getString("class");
         id = getIntent().getExtras().getString("id");
 
         /**************Calendario**************/
@@ -131,7 +120,8 @@ public class HomeActivity_Aluno extends AppCompatActivity {
                         setTitle("Quadro de notas");
                         horizontalScrollView.setVisibility(View.INVISIBLE);
                         horizontalScrollView2.setVisibility(View.INVISIBLE);
-                        textView.setVisibility(View.INVISIBLE);
+                        textView.setVisibility(View.VISIBLE);
+                        textView.setText("Notas");
                         textView4.setVisibility(View.INVISIBLE);
                         calendarPickerView.setVisibility(View.INVISIBLE);
                         scrollView3.setVisibility(View.VISIBLE);
@@ -147,164 +137,82 @@ public class HomeActivity_Aluno extends AppCompatActivity {
         bottomBar.useDarkTheme(true);
     }
 
-    /**
-     * HTTP Request for Activities Screen
-     */
-    public void requestAtividades()
-    {
-        String url = APImanager.getInstance().APIatividades(id);
-        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity_Aluno.this);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                try {
-                    JSONObject response_json = new JSONObject(response);
-                    if (response_json.getString("valido").equals("true"))  {
-
-                        JSONArray atividades = response_json.getJSONArray("atividades");
-                        for (int i = 0; i < atividades.length(); i++) {
-                            final JSONObject atividade = atividades.getJSONObject(i);
-                            final String textAtividade =
-                                            atividade.getString("turma") + "\n" +
-                                            atividade.getString("nome") + "\nProf: " +
-                                            atividade.getString("professor") + "\n" +
-                                            atividade.getString("prazo");
-
-                            final Button buttonAtividade = new Button(HomeActivity_Aluno.this);
-                            buttonAtividade.setText(textAtividade);
-                            buttonAtividade.setTextSize(buttonSize);
-
-                            buttonAtividade.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    bottomBar.selectTabAtPosition(2, true);
-                                    scrollView3.scrollTo(0, 0);
-                                    try {
-                                        topLinearLayout3.removeAllViews();
-                                        String turma = atividade.getString("turma");
-                                        setTitle("Turma: " + turma);
-
-                                        for (int j = 0; j < notas.length(); j++) {
-                                            final JSONObject nota = notas.getJSONObject(j);
-                                            if (nota.getString("turma").equals(turma)) {
-
-                                                Button buttonNota = new Button(HomeActivity_Aluno.this);
-                                                String textNota =  "Atividade: "+ nota.getString("atividade") + "\n" +
-                                                                    "Nota: "    + nota.getString("nota") + "\n" +
-                                                                    "Prazo: "   + nota.getString("prazo") + "\n" +
-                                                                    "Envio: "   + nota.getString("data_envio");
-
-                                                buttonNota.setText(textNota);
-                                                buttonNota.setTextSize(buttonSize);
-
-                                                topLinearLayout3.addView(buttonNota);
-                                            }
-                                        }
-                                    }
-                                    catch (JSONException e) {
-                                        Toast.makeText(HomeActivity_Aluno.this, "Erro no JSON", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                            if (atividade.getString("entrega").equals("false")) {
-                                if (isExpired(atividade.getString("prazo")))
-                                    buttonAtividade.setTextColor(Color.parseColor("red"));
-                                else buttonAtividade.setTextColor(Color.parseColor("blue"));
-                                topLinearLayout.addView(buttonAtividade);
-                            } else {
-                                topLinearLayout2.addView(buttonAtividade);
-                            }
-                        }
-                    } else {
-
-                        Toast.makeText(HomeActivity_Aluno.this, "Lista de Atividades inválida!", Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-
-                    Toast.makeText(HomeActivity_Aluno.this, "Erro Json", Toast.LENGTH_LONG).show();
-                }
-            }
-        },
-        new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                Toast.makeText(HomeActivity_Aluno.this, error.toString(), Toast.LENGTH_LONG).show();
-
-            }
-        });
-        requestQueue.add(stringRequest);
+    void performRequests() {
+        manager.delegate = this;
+        manager.delegateKind = 0;
+        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APInotas(id));
+        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APIcalendario(id));
+        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APIatividades(id));
     }
 
-    /**
-     * HTTP Request for Calendar Screen
-     */
-    private void requestCalendario() {
+    public void showAtividades(JSONArray listaAtividades) {
+        this.atividades = listaAtividades;
+        try {
+            for (int i = 0; i < atividades.length(); i++) {
+                final JSONObject atividade = atividades.getJSONObject(i);
+                final String textAtividade =
+                        atividade.getString("turma") + "\n" +
+                                atividade.getString("nome") + "\nProf: " +
+                                atividade.getString("professor") + "\n" +
+                                atividade.getString("prazo");
 
-        String url = APImanager.getInstance().APIcalendario(id);
-        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity_Aluno.this);
+                final Button buttonAtividade = new Button(HomeActivity_Aluno.this);
+                buttonAtividade.setText(textAtividade);
+                buttonAtividade.setTextSize(buttonSize);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                try {
-                    JSONObject response_json = new JSONObject(response);
-                    if (response_json.getString("valido").equals("true"))  {
-
-
-                    } else {
-
-                        Toast.makeText(HomeActivity_Aluno.this, "Calendario inválido!", Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-
-                    Toast.makeText(HomeActivity_Aluno.this, "Erro Json", Toast.LENGTH_LONG).show();
-                }
-            }
-        },
-        new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(HomeActivity_Aluno.this, error.toString(), Toast.LENGTH_LONG).show();
-            }
-        });
-        requestQueue.add(stringRequest);
-    }
-
-    /**
-     * HTTP Request for Notas Screen
-     */
-    public void requestNotas() {
-        String urlNotas = APImanager.getInstance().APInotas(id);
-        RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity_Aluno.this);
-        StringRequest stringRequestNotas = new StringRequest(Request.Method.GET, urlNotas,
-                new Response.Listener<String>() {
+                buttonAtividade.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onResponse(String response) {
+                    public void onClick(View v) {
+                        bottomBar.selectTabAtPosition(2, true);
+                        scrollView3.scrollTo(0, 0);
                         try {
-                            JSONObject resposta = new JSONObject(response);
-                            if (resposta.getString("valido").equals("true")) {
-                                notas = resposta.getJSONArray("notas");
+                            topLinearLayout3.removeAllViews();
+                            String turma = atividade.getString("turma");
+                            setTitle("Turma: " + turma);
+
+                            for (int j = 0; j < notas.length(); j++) {
+                                final JSONObject nota = notas.getJSONObject(j);
+                                if (nota.getString("turma").equals(turma)) {
+
+                                    Button buttonNota = new Button(HomeActivity_Aluno.this);
+                                    String textNota = "Atividade: " + nota.getString("atividade") + "\n" +
+                                            "Nota: " + nota.getString("nota") + "\n" +
+                                            "Prazo: " + nota.getString("prazo") + "\n" +
+                                            "Envio: " + nota.getString("data_envio");
+
+                                    buttonNota.setText(textNota);
+                                    buttonNota.setTextSize(buttonSize);
+
+                                    topLinearLayout3.addView(buttonNota);
+                                }
                             }
-                        }
-                        catch (JSONException e) {
-                            Toast.makeText(HomeActivity_Aluno.this, "Erro Json Notas",Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(HomeActivity_Aluno.this, "Erro no JSON", Toast.LENGTH_SHORT).show();
                         }
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(HomeActivity_Aluno.this,error.toString(),Toast.LENGTH_SHORT).show();
-                    }
-                }){
-        };
-        requestQueue.add(stringRequestNotas);
+                });
+                if (atividade.getString("entrega").equals("false")) {
+                    if (isExpired(atividade.getString("prazo")))
+                        buttonAtividade.setTextColor(Color.parseColor("red"));
+                    else buttonAtividade.setTextColor(Color.parseColor("blue"));
+                    topLinearLayout.addView(buttonAtividade);
+                } else topLinearLayout2.addView(buttonAtividade);
+            }
+        } catch (JSONException e) {
+            Toast.makeText(HomeActivity_Aluno.this, "Erro Json", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void showNotasBisonhoQueORodrigoFez(JSONObject listaNotas) {
+
+    }
+
+    public void showNotas(JSONArray listaNotas) {
+        this.notas = listaNotas;
+    }
+
+    public void showCalendario(JSONArray calendario) {
+        this.datas = calendario;
     }
 
     public boolean isExpired (String date) {

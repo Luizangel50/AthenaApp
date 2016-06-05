@@ -151,13 +151,9 @@ public class LoginActivity extends AppCompatActivity  implements
                                         startActivity(it_professor);
                                     }
                                 }
-                                else {
-                                    Toast.makeText(LoginActivity.this, "Login inválido!",Toast.LENGTH_LONG).show();
-                                }
+                                else Toast.makeText(LoginActivity.this, "Login inválido!",Toast.LENGTH_LONG).show();
                             }
-
                             catch (JSONException e) {
-
                                 Toast.makeText(LoginActivity.this,"Erro Json",Toast.LENGTH_LONG).show();
                             }
                         }
