@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.test.suitebuilder.annotation.Suppress;
 import android.view.View;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
@@ -12,17 +11,12 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.BottomBarFragment;
 import com.roughike.bottombar.OnTabSelectedListener;
 
+import com.squareup.timessquare.CalendarCellDecorator;
+import com.squareup.timessquare.CalendarCellView;
 import com.squareup.timessquare.CalendarPickerView;
 
 import org.json.JSONArray;
@@ -30,8 +24,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 
 public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterface{
@@ -61,10 +56,10 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
         id = getIntent().getExtras().getString("id");
 
         /**************Calendario**************/
-        Calendar nextYear = Calendar.getInstance();
-        nextYear.add(Calendar.MONTH, 3);
+        Calendar nextMonth = Calendar.getInstance();
+        nextMonth.add(Calendar.MONTH, 1);
         calendarPickerView = (CalendarPickerView) findViewById(R.id.calendarView);
-        calendarPickerView.init(new Date(), nextYear.getTime())
+        calendarPickerView.init(new Date(), nextMonth.getTime())
                 .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
 
         calendarPickerView.setVisibility(View.INVISIBLE);
@@ -213,11 +208,55 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
 
     public void showCalendario(JSONArray calendario) {
         this.datas = calendario;
+
+        CalendarCellDecorator cellDecorator = new CalendarCellDecorator() {
+            @Override
+            public void decorate(CalendarCellView cellView, Date date) {
+                try {
+                    for (int i = 0; i < datas.length(); i++) {
+                        final JSONObject data = datas.getJSONObject(i);
+
+                        if (data.has("data_envio") && date.equals(sdf.parse(data.getString("data_envio")))) {
+                            cellView.setDayOfMonthTextView(cellContent(daysdf.format(date),
+                                    cellView.getDayOfMonthTextView(), Color.rgb(200, 225, 165),
+                                    (data.getString("turma") + "\n" + data.getString("atividade"))
+                                ));
+                            return;
+                        }
+                        else if (date.equals(sdf.parse(data.getString("prazo")))) {
+                            if (data.has("fechada") && data.getString("fechada").equals("true"))
+                                cellView.setDayOfMonthTextView(cellContent(daysdf.format(date),
+                                        cellView.getDayOfMonthTextView(), Color.rgb(255, 205, 210),
+                                        (data.getString("turma") + "\n" + data.getString("atividade"))
+                                ));
+                            else
+                                cellView.setDayOfMonthTextView(cellContent(daysdf.format(date),
+                                    cellView.getDayOfMonthTextView(), Color.rgb(255, 245, 160),
+                                    (data.getString("turma") + "\n" + data.getString("atividade"))
+                                ));
+                            return;
+                        }
+                    }
+                } catch (JSONException|ParseException e) {
+                    Toast.makeText(HomeActivity_Aluno.this, "Erro Json", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+        calendarPickerView.setDecorators(new ArrayList<>(Collections.singletonList(cellDecorator)));
+    }
+
+    TextView cellContent(String day, TextView cellTextView, int color, String text) {
+        if (cellTextView.getText().equals(day)) {
+            cellTextView.setLines(2);
+            cellTextView.setText(text);
+            cellTextView.setBackgroundColor(color);
+            cellTextView.setTextSize(16);
+        }
+        return cellTextView;
     }
 
     public boolean isExpired (String date) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             return (new Date().after(sdf.parse(date)));
         } catch (ParseException e) {
             System.out.println("error");

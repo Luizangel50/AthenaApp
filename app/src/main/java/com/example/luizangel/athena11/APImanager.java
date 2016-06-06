@@ -73,12 +73,12 @@ public class APImanager {
                 if (delegateKind == 0) {
                     if (url.contains("Matividades"))    delegate.showAtividades(response.getJSONArray("atividades"));
                     if (url.contains("Mnotas"))         delegate.showNotas(response.getJSONArray("notas"));
-                    if (url.contains("Mdatas"))         delegate.showCalendario(response.getJSONArray("datas"));
+                    if (url.contains("Mcalendario"))    delegate.showCalendario(response.getJSONArray("datas"));
                 }
                 if (delegateKind == 1) {
                     if (url.contains("Matividades"))    delegate.showAtividades(response.getJSONArray("turmas"));
                     if (url.contains("Mnotas"))         delegate.showNotasBisonhoQueORodrigoFez(response);
-                    if (url.contains("Mdatas"))         delegate.showCalendario(response.getJSONArray("datas"));
+                    if (url.contains("Mcalendario"))    delegate.showCalendario(response.getJSONArray("datas"));
                 }
             } catch (JSONException e) {
                 System.out.println("Json error");
