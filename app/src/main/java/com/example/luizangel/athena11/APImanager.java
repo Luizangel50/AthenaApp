@@ -13,6 +13,9 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.util.Date;
+
 public class APImanager {
     private static APImanager ourInstance = new APImanager();
     public static APImanager getInstance() {
@@ -85,5 +88,14 @@ public class APImanager {
             }
 
         }
+    }
+
+    public boolean isExpired (String date) {
+        try {
+            return (new Date().after(delegate.sdf.parse(date)));
+        } catch (ParseException e) {
+            System.out.println("error");
+        }
+        return true;
     }
 }

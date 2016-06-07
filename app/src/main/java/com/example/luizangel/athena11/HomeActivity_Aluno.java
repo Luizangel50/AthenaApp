@@ -19,6 +19,9 @@ import com.squareup.timessquare.CalendarCellDecorator;
 import com.squareup.timessquare.CalendarCellView;
 import com.squareup.timessquare.CalendarPickerView;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,13 +34,19 @@ import java.util.Date;
 
 public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterface{
 
-    private ScrollView scrollView3;
-    private HorizontalScrollView horizontalScrollView, horizontalScrollView2;
-    private LinearLayout topLinearLayout, topLinearLayout2, topLinearLayout3;
-    private TextView textView, textView4;
+    /**************Componentes**************/
+
+    @Bind(R.id.textView) TextView textView;
+    @Bind(R.id.textView4) TextView textView4;
+    @Bind(R.id.scrollView3) ScrollView scrollView3;
+    @Bind(R.id.horizontalScrollView) HorizontalScrollView horizontalScrollView;
+    @Bind(R.id.horizontalScrollView2) HorizontalScrollView horizontalScrollView2;
+    @Bind(R.id.linearLayout) LinearLayout topLinearLayout;
+    @Bind(R.id.linearLayout2) LinearLayout topLinearLayout2;
+    @Bind(R.id.linearLayout3) LinearLayout topLinearLayout3;
+
     private CalendarPickerView calendarPickerView;
     private BottomBar bottomBar;
-    private final int buttonSize = 30;
 
     private JSONArray atividades, notas, datas;
     private String nome, id;
@@ -47,7 +56,16 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         initialize(savedInstanceState);
+        ButterKnife.bind(this);
         performRequests();
+    }
+
+    void performRequests() {
+        manager.delegate = this;
+        manager.delegateKind = 0;
+        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APInotas(id));
+        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APIcalendario(id));
+        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APIatividades(id));
     }
 
     public void initialize(Bundle savedInstanceState) {
@@ -58,21 +76,11 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
         /**************Calendario**************/
         Calendar nextMonth = Calendar.getInstance();
         nextMonth.add(Calendar.MONTH, 1);
-        calendarPickerView = (CalendarPickerView) findViewById(R.id.calendarView);
+        calendarPickerView = (CalendarPickerView)findViewById(R.id.calendarView);
         calendarPickerView.init(new Date(), nextMonth.getTime())
                 .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
 
         calendarPickerView.setVisibility(View.INVISIBLE);
-
-        /**************Componentes**************/
-        textView = (TextView) findViewById(R.id.textView);
-        textView4 = (TextView) findViewById(R.id.textView4);
-        scrollView3 = (ScrollView) findViewById(R.id.scrollView3);
-        horizontalScrollView = (HorizontalScrollView) findViewById(R.id.horizontalScrollView);
-        horizontalScrollView2 = (HorizontalScrollView) findViewById(R.id.horizontalScrollView2);
-        topLinearLayout = (LinearLayout) findViewById(R.id.linearLayout);
-        topLinearLayout2 = (LinearLayout) findViewById(R.id.linearLayout2);
-        topLinearLayout3 = (LinearLayout) findViewById(R.id.linearLayout3);
 
         /**************Barra****************/
         bottomBar = BottomBar.attach(this, savedInstanceState);
@@ -132,14 +140,6 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
         bottomBar.useDarkTheme(true);
     }
 
-    void performRequests() {
-        manager.delegate = this;
-        manager.delegateKind = 0;
-        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APInotas(id));
-        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APIcalendario(id));
-        manager.HTTPrequest(HomeActivity_Aluno.this, APImanager.getInstance().APIatividades(id));
-    }
-
     public void showAtividades(JSONArray listaAtividades) {
         this.atividades = listaAtividades;
         try {
@@ -187,7 +187,7 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
                     }
                 });
                 if (atividade.getString("entrega").equals("false")) {
-                    if (isExpired(atividade.getString("prazo")))
+                    if (manager.isExpired(atividade.getString("prazo")))
                         buttonAtividade.setTextColor(Color.parseColor("red"));
                     else buttonAtividade.setTextColor(Color.parseColor("blue"));
                     topLinearLayout.addView(buttonAtividade);
@@ -253,15 +253,6 @@ public class HomeActivity_Aluno extends AppCompatActivity implements HomeInterfa
             cellTextView.setTextSize(16);
         }
         return cellTextView;
-    }
-
-    public boolean isExpired (String date) {
-        try {
-            return (new Date().after(sdf.parse(date)));
-        } catch (ParseException e) {
-            System.out.println("error");
-        }
-        return true;
     }
 
 }

@@ -29,14 +29,25 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class HomeActivity_Professor extends AppCompatActivity implements HomeInterface {
 
-    private ScrollView verticalScrollViewZ, verticalScrollView, verticalScrollView2, verticalScrollView3;
-    private LinearLayout topLinearLayout, topLinearLayout2, topLinearLayout3;
-    private TextView textView, textView2;
+    /**************Componentes**************/
+
+    @Bind(R.id.textView_professor) TextView textView;
+    @Bind(R.id.textView4_professor) TextView textView2;
+    @Bind(R.id.linearLayout) LinearLayout topLinearLayout;
+    @Bind(R.id.linearLayout2) LinearLayout topLinearLayout2;
+    @Bind(R.id.linearLayout3) LinearLayout topLinearLayout3;
+    @Bind(R.id.verticalScrollView_professor) ScrollView verticalScrollView;
+    @Bind(R.id.verticalScrollView2_professor) ScrollView verticalScrollView2;
+    @Bind(R.id.verticalScrollView3_professor) ScrollView verticalScrollView3;
+    @Bind(R.id.vScrollView_professor) ScrollView verticalScrollViewZ;
+
     private CalendarPickerView calendarPickerView;
     private BottomBar bottomBar;
-    private final int buttonSize = 30;
 
     private JSONObject notas;
     private JSONArray turmas, datas;
@@ -47,7 +58,16 @@ public class HomeActivity_Professor extends AppCompatActivity implements HomeInt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_professor);
         initialize(savedInstanceState);
+        ButterKnife.bind(this);
         performRequests();
+    }
+
+    void performRequests() {
+        manager.delegate = this;
+        manager.delegateKind = 1;
+        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APInotas(id));
+        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APIcalendario(id));
+        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APIatividades(id));
     }
 
     void initialize(Bundle savedInstanceState) {
@@ -58,21 +78,10 @@ public class HomeActivity_Professor extends AppCompatActivity implements HomeInt
         /**************Calendario**************/
         Calendar nextMonth = Calendar.getInstance();
         nextMonth.add(Calendar.MONTH, 1);
-        calendarPickerView = (CalendarPickerView) findViewById(R.id.calendarView_professor);
+        calendarPickerView = (CalendarPickerView)findViewById(R.id.calendarView_professor);
         calendarPickerView.init(new Date(), nextMonth.getTime())
                 .inMode(CalendarPickerView.SelectionMode.MULTIPLE);
         calendarPickerView.setVisibility(View.INVISIBLE);
-
-        /**************Componentes**************/
-        textView = (TextView) findViewById(R.id.textView_professor);
-        textView2 = (TextView) findViewById(R.id.textView4_professor);
-        topLinearLayout = (LinearLayout) findViewById(R.id.linearLayout);
-        topLinearLayout2 = (LinearLayout) findViewById(R.id.linearLayout2);
-        topLinearLayout3 = (LinearLayout) findViewById(R.id.linearLayout3);
-        verticalScrollViewZ = (ScrollView) findViewById(R.id.vScrollView_professor);
-        verticalScrollView = (ScrollView) findViewById(R.id.verticalScrollView_professor);
-        verticalScrollView2 = (ScrollView) findViewById(R.id.verticalScrollView2_professor);
-        verticalScrollView3 = (ScrollView) findViewById(R.id.verticalScrollView3_professor);
 
         /**************Barra****************/
         bottomBar = BottomBar.attach(this, savedInstanceState);
@@ -137,14 +146,6 @@ public class HomeActivity_Professor extends AppCompatActivity implements HomeInt
         bottomBar.useDarkTheme(true);
     }
 
-    void performRequests() {
-        manager.delegate = this;
-        manager.delegateKind = 1;
-        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APInotas(id));
-        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APIcalendario(id));
-        manager.HTTPrequest(HomeActivity_Professor.this, APImanager.getInstance().APIatividades(id));
-    }
-
     public void showAtividades (JSONArray listaTurmas) {
         this.turmas = listaTurmas;
         try {
@@ -204,7 +205,7 @@ public class HomeActivity_Professor extends AppCompatActivity implements HomeInt
                                 buttonAtividade.setText(textAtividade);
                                 buttonAtividade.setTextSize(buttonSize);
 
-                                if (isExpired(atividade.getString("prazo")))
+                                if (manager.isExpired(atividade.getString("prazo")))
                                     buttonAtividade.setTextColor(Color.parseColor("red"));
                                 else buttonAtividade.setTextColor(Color.parseColor("blue"));
 
@@ -279,14 +280,5 @@ public class HomeActivity_Professor extends AppCompatActivity implements HomeInt
             cellTextView.setTextSize(16);
         }
         return cellTextView;
-    }
-
-    public boolean isExpired (String date) {
-        try {
-            return (new Date().after(sdf.parse(date)));
-        } catch (ParseException e) {
-            System.out.println("error");
-        }
-        return true;
     }
 }
